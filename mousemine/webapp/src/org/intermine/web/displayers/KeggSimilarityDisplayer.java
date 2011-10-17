@@ -42,6 +42,7 @@ import org.intermine.web.logic.session.SessionMethods;
  */
 public class KeggSimilarityDisplayer extends ReportDisplayer
 {
+    private Map<String, Boolean> organismCache = new HashMap<String, Boolean>();
 
     /**
      * Construct with config and the InterMineAPI.
@@ -54,7 +55,52 @@ public class KeggSimilarityDisplayer extends ReportDisplayer
 
     @Override
     public void display(HttpServletRequest request, ReportObject reportObject) {
-    
+        Profile profile = SessionMethods.getProfile(request.getSession());
+        
+        //checks if KEGG Pathways are loaded for the organism in question
+        boolean keggLoadedForOrganism = true;
+        
+        //gets the organism name being queried
+        String organismName = getOrganismName(reportObject);
+        
+        if (organismName != null) {
+            keggLoadedForOrganism = isKeggLoadedForOrganism(organismName, profile);
+        }
+        if (!keggLoadedForOrganism) {
+            String noKeggMessage = "No KEGG Pathways loaded for " + organismName;
+            request.setAttribute("noKeggMessage", noKeggMessage);
+        } else {
+            
+        }
+
         return;
+    }
+    
+    private String getOrganismName(ReportObject reportObject) {
+        Organism organism = ((BioEntity) reportObject.getObject()).getOrganism();
+        if (organism != null) {
+            if (!StringUtils.isBlank(organism.getName())) {
+                return organism.getName();
+            } else if (organism.getTaxonId() != null) {
+                return "" + organism.getTaxonId();
+            }
+        }
+        return null;
+    }
+    
+    private boolean isKeggLoadedForOrganism(String organismField, Profile profile) {
+        if (!organismCache.containsKey(organismField)) {
+            PathQuery q = new PathQuery(im.getModel());
+            q.addViews("Gene.pathways.identifier");
+            if (StringUtils.isNumeric(organismField)) {
+                q.addConstraint(Constraints.eq("Gene.organism.taxonId", organismField));
+            } else {
+                q.addConstraint(Constraints.eq("Gene.organism.name", organismField));
+            }
+            PathQueryExecutor executor = im.getPathQueryExecutor(profile);
+            ExportResultsIterator result = executor.execute(q, 0, 1);
+            organismCache.put(organismField, Boolean.valueOf(result.hasNext()));
+        }
+        return organismCache.get(organismField).booleanValue();
     }
 }
