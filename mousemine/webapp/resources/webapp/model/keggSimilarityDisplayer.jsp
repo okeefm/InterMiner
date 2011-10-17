@@ -4,5 +4,17 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!-- keggSimilarityDisplayer.jsp -->
+<div class="basic-table">
+    <h3>Similar Genes by KEGG pathways</h3>
+    
+    <c:choose>
+      <c:when test="${!empty noKeggMessage }">
+        <p>${noKeggMessage}</p>
+      </c:when>
+      <c:otherwise>
+        <p>KEGG Loaded!</p>
+      </c:otherwise>
+    </c:choose>
+</div>
 
-<!-- /keggsimilarityDisplayer.jsp -->
+<!-- /keggSimilarityDisplayer.jsp -->
