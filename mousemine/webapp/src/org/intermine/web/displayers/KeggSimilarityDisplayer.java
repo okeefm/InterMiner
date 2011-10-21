@@ -89,23 +89,19 @@ public class KeggSimilarityDisplayer extends ReportDisplayer
             } else {
                 request.setAttribute("primaryIdentifier", primaryIdentifier);
                 request.setAttribute("name", name);
-                
-                if (pathwayCache.size() == 0) {
-                    ArrayList<String> genes = getAllGenesForOrganism(organismName, profile);
-                    if (pathwayNames.length == 0) {
-                        pathwayNames = getAllPathways(profile);
-                    }
-                    for (String gene : genes) {
-                        Integer[] pathways = getKeggPathwaysForGene(organismName, gene, profile);
-                        pathwayCache.put(gene, pathways);
-                    }
-                }
-                if (pathwayNames.length > 0) {
-                    request.setAttribute("pathwayNames", pathwayNames);
-                } else {
-                    request.setAttribute("pathwayNames", "empty");
-                }
+                ArrayList<String> genes = getAllGenesForOrganism(organismName, profile);
+                request.setAttribute("posCorrGenes", genes.subList(0, 9).toArray());
+                request.setAttribute("negCorrGenes", genes.subList(10, 19).toArray());
+                //if (pathwayNames.length == 0) {
+                //    pathwayNames = getAllPathways(profile);
+                //}
             }
+            //if (pathwayNames.length > 0) {
+            //    request.setAttribute("pathwayNames", pathwayNames);
+            //} else {
+            //    request.setAttribute("pathwayNames", "empty");
+            //}
+            request.setAttribute("pathwayNames", "empty");
         }
 
     }

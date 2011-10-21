@@ -13,18 +13,30 @@
       </c:when>
       <c:otherwise>
         <table>
-                <c:if test="${empty primaryIdentifier}">
-                    <p>Primary Identifier Empty</p>
-                </c:if>
                 <thead>
-                     <tr><th colspan="2">KEGG Loaded for ${primaryIdentifier}, ${name}.</th></tr>
+                     <tr><th colspan="1"><font color="green">Positively correlated genes</font></th></tr>
                 </thead>
                 
                 <tbody
-                    <c:forEach items="${pathwayNames}" var="pathwayName">
+                    <c:forEach items="${posCorrGenes}" var="posCorrGene">
                         <tr>
                             <td>
-                                <c:out value="${pathwayName}"/>
+                                <font color="green"><c:out value="${posCorrGene}"/></font>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+        </table>
+        <table>
+                <thead>
+                     <tr><th colspan="1"><font color="red">Negatively correlated genes</font></th></tr>
+                </thead>
+                
+                <tbody
+                    <c:forEach items="${negCorrGenes}" var="negCorrGene">
+                        <tr>
+                            <td>
+                                <font color="red"><c:out value="${negCorrGene}"/></font>
                             </td>
                         </tr>
                     </c:forEach>
