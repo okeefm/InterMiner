@@ -12,7 +12,24 @@
         <p>${noKeggMessage}</p>
       </c:when>
       <c:otherwise>
-        <p>KEGG Loaded!</p>
+        <table>
+                <c:if test="${empty primaryIdentifier}">
+                    <p>Primary Identifier Empty</p>
+                </c:if>
+                <thead>
+                     <tr><th colspan="2">KEGG Loaded for ${primaryIdentifier}, ${name}.</th></tr>
+                </thead>
+                
+                <tbody
+                    <c:forEach items="${genes}" var="geneID">
+                        <tr>
+                            <td>
+                                <c:out value="${geneID}"/>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+        </table>
       </c:otherwise>
     </c:choose>
 </div>

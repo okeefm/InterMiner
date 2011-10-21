@@ -80,21 +80,22 @@ public class KeggSimilarityDisplayer extends ReportDisplayer
             String primaryIdentifier, name = null;
             try {
                 primaryIdentifier = (String) object.getFieldValue("primaryIdentifier");
-                name = (String) object.getFieldValue("name");
             } catch (IllegalAccessException e) {
                 return;
             }
             if (StringUtils.isEmpty(primaryIdentifier)) {
+                request.setAttribute("primaryIdentifier", "empty");
                 return;
-            }
+            } else {
+            System.out.println("Primary Identifier: " + primaryIdentifier);
             request.setAttribute("primaryIdentifier", primaryIdentifier);
+            request.setAttribute("name", name);
+            
             ArrayList<String> genes = getAllGenesForOrganism(organismName, profile);
-            String[] fewGenes = new String[10];
-            System.arraycopy(genes.toArray(), 0, fewGenes, 0, 10);
-            request.setAttribute("genes", fewGenes);
+            request.setAttribute("genes", genes.toArray());
+            }
         }
 
-        return;
     }
     
     private ArrayList<String> getAllGenesForOrganism(String organismName, Profile profile) {
