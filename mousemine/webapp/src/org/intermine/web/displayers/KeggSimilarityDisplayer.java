@@ -44,7 +44,7 @@ import org.intermine.web.logic.session.SessionMethods;
 public class KeggSimilarityDisplayer extends ReportDisplayer
 {
     private Map<String, Boolean> organismCache = new HashMap<String, Boolean>();
-    private Map<String, Boolean[]> geneKeggCache = new HashMap<String, Boolean[]>();
+    private Map<String, Integer[]> pathwayCache = new HashMap<String, Boolean[]>();
     private String[] pathwayNames;
 
     /**
@@ -87,15 +87,62 @@ public class KeggSimilarityDisplayer extends ReportDisplayer
                 request.setAttribute("primaryIdentifier", "empty");
                 return;
             } else {
-            System.out.println("Primary Identifier: " + primaryIdentifier);
-            request.setAttribute("primaryIdentifier", primaryIdentifier);
-            request.setAttribute("name", name);
-            
-            ArrayList<String> genes = getAllGenesForOrganism(organismName, profile);
-            request.setAttribute("genes", genes.toArray());
+                System.out.println("Primary Identifier: " + primaryIdentifier);
+                request.setAttribute("primaryIdentifier", primaryIdentifier);
+                request.setAttribute("name", name);
+                
+                if (pathwayCache.size() == 0) {
+                    ArrayList<String> genes = getAllGenesForOrganism(organismName, profile);
+                    if (pathwayNames.length == 0) {
+                        pathwayNames = getAllPathways(profile);
+                    }
+                    for (String gene : genes) {
+                        Integer[] pathways = getKeggPathwaysForGene(organismName, gene, profile);
+                        pathwayCache.put(gene, pathways);
+                    }
+                } 
             }
         }
 
+    }
+    
+    private String[] getAllPathways(Profile profile) {
+        PathQuery q = new PathQuery(im.getmodel());
+        q.addViews("Pathway.identifier");
+        q.addOrderBy("Pathway.identifier", OrderDirection.ASC);
+        PathQueryExecutor executor = im.getPathQueryExecutor(profile);
+        ExportResultsIterator it = executor.execute(q);
+        ArrayList<String> pathways = new ArrayList<String>();
+        List <ResultElement> row = new List<ResultElement>();
+        while (it.hasNext()) {
+            row = it.next();
+            pathways.add((String) row.get(0).getField());
+        }
+        return pathways.toArray();
+    }
+    
+    private Integer[] getKeggPathwaysForGene(String organismName, String gene, Profile profile) {
+        PathQuery q = new PathQuery(im.getModel());
+        q.addViews("Gene.pathways.identifier");
+        q.addConstraint(Constraints.eq("Gene.primaryIdentifier", gene));
+        q.addConstraint(Constraints.eq("Gene.organism.name", organismName));
+        q.addOrderby("Gene.pathways.identifier", OrderDirection.ASC);
+        PathQueryExecutor executor = im.getPathQueryExecutor(profile);
+        ExportResultsIterator it = executor.execute(q);
+        ArrayList<Integer> pathways = new ArrayList<Integer>();
+        int i = 0;
+        List <ResultElement> row = it.next();
+        while (it.hasNext()) {
+            if (pathwayNames[i] == (String) row.get(0).getField()) {
+                row = it.next();
+                pathways.add(1);
+                i++;
+            } else {
+                pathways.add(0);
+                i++;
+            }
+        }
+        return pathways.toArray();
     }
     
     private ArrayList<String> getAllGenesForOrganism(String organismName, Profile profile) {
@@ -105,11 +152,12 @@ public class KeggSimilarityDisplayer extends ReportDisplayer
             q.addConstraint(Constraints.eq("Gene.organism.name", organismName));
             q.addOrderBy("Gene.primaryIdentifier", OrderDirection.ASC);
             PathQueryExecutor executor = im.getPathQueryExecutor(profile);
-            ExportResultsIterator it = executor.execute(q, 0, 20);
+            ExportResultsIterator it = executor.execute(q, 0, 100);
             ArrayList<String> genes = new ArrayList<String>();
+            List <ResultElement> row = new List<ResultElement>();
             while (it.hasNext()) {
-                List <ResultElement> row = it.next();
-                    genes.add((String) row.get(0).getField());
+                row = it.next();
+                genes.add((String) row.get(0).getField());
             }
             return genes;
         }
