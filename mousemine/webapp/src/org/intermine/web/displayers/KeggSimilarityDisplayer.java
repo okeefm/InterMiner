@@ -105,11 +105,11 @@ public class KeggSimilarityDisplayer extends ReportDisplayer
             q.addConstraint(Constraints.eq("Gene.organism.name", organismName));
             q.addOrderBy("Gene.primaryIdentifier", OrderDirection.ASC);
             PathQueryExecutor executor = im.getPathQueryExecutor(profile);
-            ExportResultsIterator it = executor.execute(q, 0, 1);
+            ExportResultsIterator it = executor.execute(q, 0, 20);
             ArrayList<String> genes = new ArrayList<String>();
             while (it.hasNext()) {
                 List <ResultElement> row = it.next();
-                genes.add((String) row.get(0).getField());
+                    genes.add((String) row.get(0).getField());
             }
             return genes;
         }
