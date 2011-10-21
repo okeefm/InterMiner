@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -43,6 +44,8 @@ import org.intermine.web.logic.session.SessionMethods;
 public class KeggSimilarityDisplayer extends ReportDisplayer
 {
     private Map<String, Boolean> organismCache = new HashMap<String, Boolean>();
+    private Map<String, Boolean[]> geneKeggCache = new HashMap<String, Boolean[]>();
+    private String[] pathwayNames;
 
     /**
      * Construct with config and the InterMineAPI.
@@ -70,10 +73,46 @@ public class KeggSimilarityDisplayer extends ReportDisplayer
             String noKeggMessage = "No KEGG Pathways loaded for " + organismName;
             request.setAttribute("noKeggMessage", noKeggMessage);
         } else {
+            Model model = im.getModel();
+            PathQueryExecutor executor = im.getPathQueryExecutor(profile);
             
+            InterMineObject object = (InterMineObject) request.getAttribute("object");
+            String primaryIdentifier, name = null;
+            try {
+                primaryIdentifier = (String) object.getFieldValue("primaryIdentifier");
+                name = (String) object.getFieldValue("name");
+            } catch (IllegalAccessException e) {
+                return;
+            }
+            if (StringUtils.isEmpty(primaryIdentifier)) {
+                return;
+            }
+            request.setAttribute("primaryIdentifier", primaryIdentifier);
+            ArrayList<String> genes = getAllGenesForOrganism(organismName, profile);
+            String[] fewGenes = new String[10];
+            System.arraycopy(genes.toArray(), 0, fewGenes, 0, 10);
+            request.setAttribute("genes", fewGenes);
         }
 
         return;
+    }
+    
+    private ArrayList<String> getAllGenesForOrganism(String organismName, Profile profile) {
+        if (!StringUtils.isBlank(organismName)) {
+            PathQuery q = new PathQuery(im.getModel());
+            q.addViews("Gene.primaryIdentifier");
+            q.addConstraint(Constraints.eq("Gene.organism.name", organismName));
+            q.addOrderBy("Gene.primaryIdentifier", OrderDirection.ASC);
+            PathQueryExecutor executor = im.getPathQueryExecutor(profile);
+            ExportResultsIterator it = executor.execute(q, 0, 1);
+            ArrayList<String> genes = new ArrayList<String>();
+            while (it.hasNext()) {
+                List <ResultElement> row = it.next();
+                genes.add((String) row.get(0).getField());
+            }
+            return genes;
+        }
+        return null;
     }
     
     private String getOrganismName(ReportObject reportObject) {
