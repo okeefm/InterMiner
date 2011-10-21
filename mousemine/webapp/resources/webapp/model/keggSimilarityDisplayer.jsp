@@ -21,10 +21,10 @@
                 </thead>
                 
                 <tbody
-                    <c:forEach items="${genes}" var="geneID">
+                    <c:forEach items="${pathwayNames}" var="pathwayName">
                         <tr>
                             <td>
-                                <c:out value="${geneID}"/>
+                                <c:out value="${pathwayName}"/>
                             </td>
                         </tr>
                     </c:forEach>
