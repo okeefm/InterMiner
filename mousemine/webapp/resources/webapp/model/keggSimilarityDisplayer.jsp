@@ -14,7 +14,8 @@
       <c:otherwise>
         <table>
                 <thead>
-                     <tr><th colspan="1"><font color="green">Positively correlated genes</font></th></tr>
+                     <tr><th colspan="1"><font color="green">Positive correlation</font></th></tr>
+                     <tr><th colspan="1"><font color="green">Correlation value</font></th></tr>
                 </thead>
                 
                 <tbody
@@ -23,13 +24,18 @@
                             <td>
                                 <font color="green"><c:out value="${posCorrGene}"/></font>
                             </td>
+                            <td>
+                                <font color="green"><%= Math.random() %></font>
+                            </td>
                         </tr>
                     </c:forEach>
                 </tbody>
         </table>
         <table>
                 <thead>
-                     <tr><th colspan="1"><font color="red">Negatively correlated genes</font></th></tr>
+                     <tr><th colspan="1"><font color="red">Negative Correlation</font></th></tr>
+                     <tr><th colspan="1"><font color="red">Correlation value</font></th></tr>
+
                 </thead>
                 
                 <tbody
@@ -37,6 +43,9 @@
                         <tr>
                             <td>
                                 <font color="red"><c:out value="${negCorrGene}"/></font>
+                            </td>
+                            <td>
+                                <font color="red">-<%= Math.random() %></font>
                             </td>
                         </tr>
                     </c:forEach>
