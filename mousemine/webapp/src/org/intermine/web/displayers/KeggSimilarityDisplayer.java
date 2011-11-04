@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
 import org.intermine.api.InterMineAPI;
 import org.intermine.api.profile.Profile;
 import org.intermine.api.query.PathQueryExecutor;
@@ -45,7 +47,8 @@ public class KeggSimilarityDisplayer extends ReportDisplayer
 {
     private Map<String, Boolean> organismCache = new HashMap<String, Boolean>();
     private Map<String, Integer[]> pathwayCache = new HashMap<String, Integer[]>();
-    private String[] pathwayNames;
+    private ArrayList<String> pathwayNames = new ArrayList<String>();
+    private static final Logger LOG = Logger.getLogger(KeggSimilarityDisplayer.class);
 
     /**
      * Construct with config and the InterMineAPI.
@@ -88,29 +91,17 @@ public class KeggSimilarityDisplayer extends ReportDisplayer
                 return;
             } else {
                 request.setAttribute("primaryIdentifier", primaryIdentifier);
-                request.setAttribute("name", name);
-                
-                if (pathwayCache.size() == 0) {
-                    ArrayList<String> genes = getAllGenesForOrganism(organismName, profile);
-                    if (pathwayNames.length == 0) {
-                        pathwayNames = getAllPathways(profile);
-                    }
-                    for (String gene : genes) {
-                        Integer[] pathways = getKeggPathwaysForGene(organismName, gene, profile);
-                        pathwayCache.put(gene, pathways);
-                    }
+                if (pathwayNames.size() == 0) {
+                    pathwayNames = getAllPathways(profile);
                 }
-                if (pathwayNames.length > 0) {
-                    request.setAttribute("pathwayNames", pathwayNames);
-                } else {
-                    request.setAttribute("pathwayNames", "empty");
-                }
+                request.setAttribute("pathwayNames", pathwayNames.subList(0, 20));
             }
         }
 
     }
     
-    private String[] getAllPathways(Profile profile) {
+    private ArrayList <String> getAllPathways(Profile profile) {
+        //LOG.error("Enters getAllPathways");
         PathQuery q = new PathQuery(im.getModel());
         q.addViews("Pathway.identifier");
         q.addOrderBy("Pathway.identifier", OrderDirection.ASC);
@@ -120,9 +111,10 @@ public class KeggSimilarityDisplayer extends ReportDisplayer
         List <ResultElement> row = new ArrayList<ResultElement>();
         while (it.hasNext()) {
             row = it.next();
+            LOG.error("Row 0 field: " + (String) row.get(0).getField());
             pathways.add((String) row.get(0).getField());
         }
-        return (String[]) pathways.toArray();
+        return pathways;
     }
     
     private Integer[] getKeggPathwaysForGene(String organismName, String gene, Profile profile) {
@@ -137,7 +129,7 @@ public class KeggSimilarityDisplayer extends ReportDisplayer
         int i = 0;
         List <ResultElement> row = it.next();
         while (it.hasNext()) {
-            if (pathwayNames[i] == (String) row.get(0).getField()) {
+            if (pathwayNames.get(i) == (String) row.get(0).getField()) {
                 row = it.next();
                 pathways.add(1);
                 i++;

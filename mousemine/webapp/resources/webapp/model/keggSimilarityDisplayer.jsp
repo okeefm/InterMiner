@@ -17,10 +17,10 @@
                     <p>Primary Identifier Empty</p>
                 </c:if>
                 <thead>
-                     <tr><th colspan="2">KEGG Loaded for ${primaryIdentifier}, ${name}.</th></tr>
+                     <tr><th colspan="2">KEGG Loaded for ${primaryIdentifier}</th></tr>
                 </thead>
                 
-                <tbody
+                <tbody>
                     <c:forEach items="${pathwayNames}" var="pathwayName">
                         <tr>
                             <td>
